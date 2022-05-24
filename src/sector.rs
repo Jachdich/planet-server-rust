@@ -1,3 +1,4 @@
+use crate::star::Star;
 
 pub struct Sector {
     x: u32,

@@ -1,3 +1,6 @@
+use crate::planet::Planet;
+use crate::helpers::Colour;
+
 pub struct Star {
     x: u32,
     y: u32,
