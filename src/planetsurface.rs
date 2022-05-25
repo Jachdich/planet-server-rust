@@ -1,7 +1,7 @@
 use crate::helpers::SurfaceLocator;
 use crate::tile::Tile;
 use crate::task::Task;
-use planet_common::resources::Resources;
+use common::resources::Resources;
 
 pub struct PlanetSurface {
     tiles: Vec<Tile>,
