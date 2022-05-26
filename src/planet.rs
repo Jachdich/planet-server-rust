@@ -1,6 +1,7 @@
 use crate::planetsurface::PlanetSurface;
 use crate::helpers::Colour;
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Planet {
     rad: u32,
     sea_level: i32,

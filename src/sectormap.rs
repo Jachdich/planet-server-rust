@@ -19,7 +19,7 @@ impl SectorMap {
 
     pub fn get_sector_at(&mut self, x: i32, y: i32) -> &Sector {
         let idx = xy_to_index(x, y);
-        if self.sectors.contains_key(&idx) {
+        if !self.sectors.contains_key(&idx) {
             let mut sector = Sector::new(x, y);
             sector.generate();
             self.sectors.insert(idx, sector);

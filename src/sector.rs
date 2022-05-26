@@ -1,9 +1,12 @@
 use crate::star::Star;
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Sector {
     x: i32,
     y: i32,
+    #[serde(rename = "numStars")]
     num_stars: u32,
+    #[serde(skip)]
     generated: bool,
     stars: Vec<Star>,
 }

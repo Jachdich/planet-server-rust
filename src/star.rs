@@ -1,6 +1,7 @@
 use crate::planet::Planet;
 use crate::helpers::Colour;
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Star {
     x: u32,
     y: u32,
