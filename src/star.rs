@@ -15,3 +15,4 @@ pub struct Star {
 
     effective_owner: u64,
 }
+

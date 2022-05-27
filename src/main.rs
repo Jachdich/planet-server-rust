@@ -6,6 +6,7 @@ mod helpers;
 mod task;
 mod tile;
 mod sectormap;
+mod generation;
 extern crate common;
 
 use std::error::Error;
