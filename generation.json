@@ -7,20 +7,20 @@
         "base_colour": [100, 255],
         "angular_velocity_mult": 6000.0,
         "num_colours": [1, 6],
-        "sea_level": [-30, 16],
+        "sea_level": [-30, 16]
     },
 
     "sector": {
-        "num_stars": [0, 4],
-    }
+        "num_stars": [0, 4]
+    },
 
-    "star" {
+    "star": {
         "num_planets": [2, 6],
         "rad": [5, 12],
         "temp": [1000, 10000],
         "noise_scl": [20, 40],
-        "noise_effect": [0.15, 0.35],
-    }
+        "noise_effect": [0.15, 0.35]
+    },
 
     "level_seed": 1234
 }

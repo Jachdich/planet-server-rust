@@ -35,6 +35,9 @@ const ERR_NOT_AUTHORISED: i32 = -7;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+
+    let gencfg = generation::GenParams::load_from("generation.json")?;
+    println!("{:?}", gencfg);
     env_logger::init();
     log::set_max_level(log::LevelFilter::Trace);
     let addr = "0.0.0.0:28097".to_string();
