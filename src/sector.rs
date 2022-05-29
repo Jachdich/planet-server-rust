@@ -1,4 +1,5 @@
 use crate::star::Star;
+use crate::generation::GenParams;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Sector {
@@ -12,12 +13,17 @@ pub struct Sector {
 }
 
 impl Sector {
-    pub fn new(x: i32, y: i32) -> Self {
+    pub fn new(x: i32, y: i32, gen: &GenParams) -> Self {
+        let num_stars = gen.sector.num_stars.gen_rand();
+        let mut stars: Vec<Star> = Vec::new();
+        for _ in 0..num_stars {
+            stars.push(Star::new(gen));
+        }
         Self {
             x, y,
-            num_stars: 0,
+            num_stars,
             generated: false,
-            stars: Vec::new()
+            stars: stars
         }
     }
 

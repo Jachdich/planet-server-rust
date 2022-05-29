@@ -8,9 +8,15 @@ use std::marker::PhantomData;
 use serde::de::Visitor;
 use serde::de::SeqAccess;
 use serde::de::Error;
+use rand::Rng;
 
-#[derive(Debug)]
 pub struct Range<T>(RangeInclusive<T>);
+
+impl<T: std::cmp::PartialOrd + rand::distributions::uniform::SampleUniform + Clone> Range<T> {
+    pub fn gen_rand(&self) -> T {
+        rand::thread_rng().gen_range(self.0.clone())
+    }
+}
 
 impl<T> Serialize for Range<T> where T: Serialize {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> 
@@ -70,7 +76,7 @@ impl<'a, T> Deserialize<'a> for Range<T> where T: Deserialize<'a> + Copy {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct StarGen {
     pub num_planets: Range<u32>,
     pub rad: Range<u32>,
@@ -78,7 +84,8 @@ pub struct StarGen {
     pub noise_scl: Range<f64>,
     pub noise_effect: Range<f64>
 }
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct PlanetGen {
     pub rad: Range<u32>,
     pub gen_chance: Range<f64>,
@@ -90,12 +97,12 @@ pub struct PlanetGen {
     pub sea_level: Range<i32>
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct SectorGen {
     pub num_stars: Range<u32>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct GenParams {
     pub planet: PlanetGen,
     pub sector: SectorGen,

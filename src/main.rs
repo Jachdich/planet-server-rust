@@ -33,14 +33,17 @@ const ERR_INVALID_CREDENTIALS: i32 = -5;
 const ERR_NOT_AUTHENTICATED: i32 = -6;
 const ERR_NOT_AUTHORISED: i32 = -7;
 
+type ArcMap = Arc<Mutex<SectorMap>>;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
 
     let gencfg = generation::GenParams::load_from("generation.json")?;
-    println!("{:?}", gencfg);
+
     env_logger::init();
     log::set_max_level(log::LevelFilter::Trace);
-    let addr = "0.0.0.0:28097".to_string();
+    //let addr = "0.0.0.0:28097".to_string();
+    let addr = "0.0.0.0:5555".to_string();
 
     let listener = TcpListener::bind(&addr).await?;
     log::info!("Listening on {}", &addr);
@@ -52,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         native_tls::TlsAcceptor::builder(cert).build().unwrap()
     );
 
-    let state = Arc::new(Mutex::new(SectorMap::new()));
+    let state = Arc::new(Mutex::new(SectorMap::new(gencfg)));
     
     let net_state = Arc::clone(&state);
     tokio::spawn(async move {
@@ -72,7 +75,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {}
 }
 
-async fn handle_request(request: &json::JsonValue, map: &Arc<Mutex<SectorMap>>) -> json::JsonValue {
+async fn handle_request(request: &json::JsonValue, map: &ArcMap) -> json::JsonValue {
     if !request["request"].is_string() {
         log::warn!("'request' attribute is not a string");
         return json::object!{
@@ -101,7 +104,7 @@ async fn handle_request(request: &json::JsonValue, map: &Arc<Mutex<SectorMap>>) 
     }
 }
 
-async fn handle_client(map: Arc<Mutex<SectorMap>>, 
+async fn handle_client(map: ArcMap,
                        stream: TlsStream<TcpStream>,
                        addr: SocketAddr) -> Result<(), Box<dyn Error>> {
     log::info!("Connected by {:?}", addr);
