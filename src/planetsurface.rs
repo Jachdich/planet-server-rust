@@ -15,3 +15,16 @@ pub struct PlanetSurface {
     last_ticks: u64,
 //    loc: SurfaceLocator,
 }
+
+
+impl PlanetSurface {
+    pub fn new() -> Self {
+        Self {
+            rad: 0,
+            generated: false,
+            noise_scale: 0.0,
+            noise_z: 0.0,
+            last_ticks: 0,
+        }
+    }
+}

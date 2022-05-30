@@ -1,3 +1,5 @@
+use crate::generation::Range;
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Colour(u32);
 
@@ -12,6 +14,10 @@ impl Colour {
 
     pub fn new_u32(n: u32) -> Self {
         Self{0: n}
+    }
+
+    pub fn rand(range: &Range<u8>) -> Self {
+        Colour::new_rgb(range.gen_rand(), range.gen_rand(), range.gen_rand())
     }
 
     pub fn r(&self) -> u8 { ((self.0 >> 16) & 0xFF) as u8 }

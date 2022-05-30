@@ -71,12 +71,20 @@ fn k_to_rgb(k: u32) -> u32 {
 
 impl Star {
     pub fn new(gen: &GenParams) -> Self {
-        let mut planets: Vec<Planet> = Vec::new();
         let mut rng = rand::thread_rng();
+        let radius = gen.star.rad.gen_rand();
+        
+        let mut planets: Vec<Planet> = Vec::new();
+        let mut last_dist: u32 = rng.gen_range(0..100) + radius * 6 + 20;
+        for _ in 0..gen.star.num_planets.gen_rand() {
+            planets.push(Planet::new(gen, last_dist));
+            last_dist += planets.last().unwrap().radius * 2 + rng.gen_range(0..100);
+        }
+        
         Self {
             x: rng.gen_range(0..256),
             y: rng.gen_range(0..256),
-            radius: gen.star.rad.gen_rand(),
+            radius,
             colour: Colour::new_u32(k_to_rgb(gen.star.temp.gen_rand())),
             num_planets: planets.len(),
             planets,
