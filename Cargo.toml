@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 planet-common = { path = "../planet-common" }
-json = "*"
 tokio-native-tls = "*"
 native-tls = "*"
 tokio = { version = "1", features = ["rt-multi-thread", "net", "macros"] }
@@ -19,3 +18,4 @@ futures = "*"
 serde_json = "1.0"
 serde = { version = "1", features = ["derive"] }
 rand = "*"
+lazy_static = "*"
