@@ -8,6 +8,8 @@ use std::marker::PhantomData;
 use serde::de::Visitor;
 use serde::de::SeqAccess;
 use serde::de::Error;
+use nanorand::Rng;
+use nanorand::WyRand;
 
 pub struct Range<T>(RangeInclusive<T>);
 
@@ -17,7 +19,7 @@ impl<T> Range<T> {
     }
 }
 
-impl<T: std::cmp::PartialOrd + Clone + + nanorand::RandomRange<nanorand::WyRand, 8_usize>> Range<T> {
+impl<T: std::cmp::PartialOrd + Clone + nanorand::RandomRange<nanorand::WyRand, 8_usize>> Range<T> {
     pub fn gen_rand(&self, rng: &mut WyRand) -> T {
         rng.generate_range(self.0.clone())
     }

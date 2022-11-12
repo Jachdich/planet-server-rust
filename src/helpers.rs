@@ -1,4 +1,5 @@
 use crate::generation::Range;
+use nanorand::WyRand;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Colour(u32);
@@ -16,8 +17,8 @@ impl Colour {
         Self{0: n}
     }
 
-    pub fn rand(range: &Range<u8>, rng: &) -> Self {
-        Colour::new_rgb(range.gen_rand(), range.gen_rand(), range.gen_rand())
+    pub fn rand(range: &Range<u8>, rng: &mut WyRand) -> Self {
+        Colour::new_rgb(range.gen_rand(rng), range.gen_rand(rng), range.gen_rand(rng))
     }
 
     pub fn r(&self) -> u8 { ((self.0 >> 16) & 0xFF) as u8 }
