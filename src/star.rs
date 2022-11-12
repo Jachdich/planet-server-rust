@@ -1,7 +1,7 @@
 use crate::planet::Planet;
 use crate::helpers::Colour;
 use crate::generation::GenParams;
-use rand::Rng;
+use nanorand::{Rng, WyRand};
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Star {
@@ -70,27 +70,26 @@ fn k_to_rgb(k: u32) -> u32 {
 
 
 impl Star {
-    pub fn new(gen: &GenParams) -> Self {
-        let mut rng = rand::thread_rng();
-        let radius = gen.star.rad.gen_rand();
+    pub fn new(gen: &GenParams, rng: &mut WyRand) -> Self {
+        let radius = gen.star.rad.gen_rand(rng);
         
         let mut planets: Vec<Planet> = Vec::new();
-        let mut last_dist: u32 = rng.gen_range(0..100) + radius * 6 + 20;
-        for _ in 0..gen.star.num_planets.gen_rand() {
-            planets.push(Planet::new(gen, last_dist));
-            last_dist += planets.last().unwrap().radius * 2 + rng.gen_range(0..100);
+        let mut last_dist: u32 = rng.generate_range(0..100) + radius * 6 + 20;
+        for _ in 0..gen.star.num_planets.gen_rand(rng) {
+            planets.push(Planet::new(gen, last_dist, rng));
+            last_dist += planets.last().unwrap().radius * 2 + rng.generate_range(0..100);
         }
         
         Self {
-            x: rng.gen_range(0..256),
-            y: rng.gen_range(0..256),
+            x: rng.generate_range(0..256),
+            y: rng.generate_range(0..256),
             radius,
-            colour: Colour::new_u32(k_to_rgb(gen.star.temp.gen_rand())),
+            colour: Colour::new_u32(k_to_rgb(gen.star.temp.gen_rand(rng))),
             num_planets: planets.len(),
             planets,
-            noise_z: rng.gen_range(0.0..100000.0),
-            noise_scl: gen.star.noise_scl.gen_rand(),
-            noise_effect: gen.star.noise_effect.gen_rand(),
+            noise_z: rng.generate_range(0.0..100000.0),
+            noise_scl: gen.star.noise_scl.generate_rand(),
+            noise_effect: gen.star.noise_effect.generate_rand(),
 
             effective_owner: 0
         }

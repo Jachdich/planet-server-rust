@@ -2,7 +2,7 @@ use crate::planetsurface::PlanetSurface;
 use crate::helpers::Colour;
 use crate::generation::GenParams;
 use crate::generation::Range;
-use rand::Rng;
+use nanorand::{Rng, WyRand};
 
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -31,25 +31,24 @@ pub struct Planet {
 }
 
 impl Planet {
-    pub fn new(gen: &GenParams, pos_from_star: u32) -> Self {
-        let mut rng = rand::thread_rng();
+    pub fn new(gen: &GenParams, pos_from_star: u32, rng: &mut WyRand) -> Self {
         
-        let num_colours = gen.planet.num_colours.gen_rand();
+        let num_colours = gen.planet.num_colours.gen_rand(rng);
         let mut gen_chances = Vec::new();
         let mut gen_colours = Vec::new();
         let mut gen_zvalues = Vec::new();
         let mut gen_noise = Vec::new();
 
         for _ in 0..num_colours {
-            gen_chances.push(gen.planet.gen_chance.gen_rand());
-            gen_noise.push(gen.planet.gen_noise.gen_rand());
-            gen_zvalues.push(rng.gen_range(0..1000000));
+            gen_chances.push(gen.planet.gen_chance.gen_rand(rng));
+            gen_noise.push(gen.planet.gen_noise.gen_rand(rng));
+            gen_zvalues.push(rng.generate_range(0..1000000));
             gen_colours.push(Colour::rand(&Range::new(0..=255)));
         }
         
         Self {
-            radius: gen.planet.rad.gen_rand(),
-            sea_level: gen.planet.sea_level.gen_rand(),
+            radius: gen.planet.rad.gen_rand(rng),
+            sea_level: gen.planet.sea_level.gen_rand(rng),
             num_colours,
             owner: 0,
             gen_chances,
@@ -60,7 +59,7 @@ impl Planet {
             base_colour: Colour::rand(&gen.planet.base_colour),
             pos_from_star,
             angular_velocity: 1.0 / ((pos_from_star * pos_from_star) as f64) * gen.planet.angular_velocity_mult,
-            theta: rng.gen_range(0.0..(2.0*3.14159265358979323)),
+            theta: rng.generate_range(0.0..(2.0*3.14159265358979323)),
             sector_seed: 0,
             surface: PlanetSurface::new(),
         }

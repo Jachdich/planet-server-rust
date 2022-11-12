@@ -16,7 +16,7 @@ impl Colour {
         Self{0: n}
     }
 
-    pub fn rand(range: &Range<u8>) -> Self {
+    pub fn rand(range: &Range<u8>, rng: &) -> Self {
         Colour::new_rgb(range.gen_rand(), range.gen_rand(), range.gen_rand())
     }
 
