@@ -24,6 +24,7 @@ use tokio_native_tls::TlsStream;
 use tokio_stream::StreamExt;
 use tokio_util::codec::{Framed, LinesCodec};
 
+use crate::helpers::SurfaceLocator;
 use crate::sectormap::SectorMap;
 
 enum Err {
@@ -98,27 +99,48 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 }
 
-async fn handle_request(request: &Value, map: &ArcMap) -> Value {
+async fn handle_request(request: &Value, map: &ArcMap) -> Vec<Value> {
     if !request["request"].is_string() {
         log::warn!("'request' attribute is not a string");
-        return json!({ "status": Err::MalformedJson as i32 });
+        return vec![json!({ "status": Err::MalformedJson as i32 })];
     }
     match request["request"].as_str().unwrap() {
         "getSector" => {
             if !request["x"].is_number() || !request["y"].is_number() {
-                return json!({ "status": Err::MalformedJson as i32 });
+                return vec![json!({ "status": Err::MalformedJson as i32 })];
             }
 
             let x = request["x"].as_i64().unwrap() as i32;
             let y = request["y"].as_i64().unwrap() as i32;
             let mut map_lock = map.lock().await;
             let sec = map_lock.get_sector_at(x, y);
-            json!({
+            vec![json!({
                 "status": Err::Ok as i32,
-                "result": sec
-            })
+                "result": sec,
+                "x": x,
+                "y": y,
+                "request": "getSector",
+            })]
         }
-        _ => json!({ "status": Err::InvalidRequest as i32 }),
+        "getSurface" => {
+            let loc: SurfaceLocator = serde_json::from_value(request.clone()).unwrap();
+            let mut map_lock = map.lock().await;
+            let surface = map_lock.get_surface(&loc).unwrap();
+            let mut results = Vec::new();
+            for task in &surface.tasks {
+                let mut res_json = serde_json::to_value(&task).unwrap();
+                res_json["request"] = "setTimer".into();
+                results.push(res_json);
+            }
+            results.push(json!({
+                "request": "getSurface",
+                "loc": serde_json::to_value(&loc).unwrap(),
+                "result": serde_json::to_value(surface).unwrap(),
+            }));
+
+            results
+        }
+        _ => vec![json!({ "status": Err::InvalidRequest as i32 })],
     }
 }
 
@@ -153,20 +175,15 @@ async fn handle_client(
             continue;
         }
 
-        let mut responses = json!({
-            "requests": parsed["requests"].clone(),
-            "results": Vec::<Value>::new()
-        });
-
-        let mut responses_vec = Vec::new();
+        let mut results_vec: Vec<Value> = Vec::new();
         for request in parsed["requests"].as_array().unwrap() {
-            let response = handle_request(request, &map).await;
-            responses_vec.push(response);
+            let mut responses = handle_request(request, &map).await;
+            results_vec.append(&mut responses);
         }
 
-        responses["results"] = Value::Array(responses_vec);
+        let results = json!({ "results": results_vec });
 
-        lines.send(responses.to_string()).await?;
+        lines.send(results.to_string()).await?;
     }
     Ok(())
 }
