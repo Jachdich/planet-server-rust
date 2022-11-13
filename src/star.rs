@@ -1,7 +1,8 @@
-use crate::planet::Planet;
-use crate::helpers::Colour;
 use crate::generation::GenParams;
+use crate::helpers::{Colour, SurfaceLocator};
+use crate::planet::Planet;
 use rand::Rng;
+use std::option::Option;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Star {
@@ -32,55 +33,72 @@ fn k_to_rgb(k: u32) -> u32 {
     let mut b: f64;
 
     if temp <= 66.0 {
-    	r = 255.0;
+        r = 255.0;
     } else {
-    	r = temp - 60.0;
-    	r = 329.698727446 * r.powf(-0.1332047592);
-    	if r < 0.0 { r = 0.0; }
-    	if r > 255.0 { r = 255.0; }
+        r = temp - 60.0;
+        r = 329.698727446 * r.powf(-0.1332047592);
+        if r < 0.0 {
+            r = 0.0;
+        }
+        if r > 255.0 {
+            r = 255.0;
+        }
     }
-        
+
     if temp <= 66.0 {
-    	g = temp;
-    	g = 99.4708025861 * g.ln() - 161.1195681661;
-    	if g < 0.0 { g = 0.0; }
-    	if g > 255.0 { g = 255.0; }
+        g = temp;
+        g = 99.4708025861 * g.ln() - 161.1195681661;
+        if g < 0.0 {
+            g = 0.0;
+        }
+        if g > 255.0 {
+            g = 255.0;
+        }
     } else {
-    	g = temp - 60.0;
-    	g = 288.1221695283 * g.powf(-0.0755148492);
-    	if g < 0.0 { g = 0.0; }
-    	if g > 255.0 { g = 255.0; }
+        g = temp - 60.0;
+        g = 288.1221695283 * g.powf(-0.0755148492);
+        if g < 0.0 {
+            g = 0.0;
+        }
+        if g > 255.0 {
+            g = 255.0;
+        }
     }
-    
+
     if temp >= 66.0 {
-    	b = 255.0;
+        b = 255.0;
     } else {
-    	if temp <= 19.0 {
-    		b = 0.0;
-    	} else {
-    		b = temp - 10.0;
-    		b = 138.5177312231 * b.ln() - 305.0447927307;
-    		if b < 0.0 { b = 0.0; }
-    		if b > 255.0 { b = 255.0; }
-    	}
+        if temp <= 19.0 {
+            b = 0.0;
+        } else {
+            b = temp - 10.0;
+            b = 138.5177312231 * b.ln() - 305.0447927307;
+            if b < 0.0 {
+                b = 0.0;
+            }
+            if b > 255.0 {
+                b = 255.0;
+            }
+        }
     }
 
     return ((r as u32) & 0xff) << 16 | ((g as u32) & 0xff) << 8 | ((b as u32) & 0xff);
 }
 
-
 impl Star {
-    pub fn new(gen: &GenParams) -> Self {
+    pub fn new(gen: &GenParams, loc: SurfaceLocator) -> Self {
         let mut rng = rand::thread_rng();
         let radius = gen.star.rad.gen_rand();
-        
+
         let mut planets: Vec<Planet> = Vec::new();
         let mut last_dist: u32 = rng.gen_range(0..100) + radius * 6 + 20;
-        for _ in 0..gen.star.num_planets.gen_rand() {
-            planets.push(Planet::new(gen, last_dist));
+        for i in 0..gen.star.num_planets.gen_rand() {
+            let mut planet_loc = loc;
+            planet_loc.planet_pos = i as usize;
+            planets.push(Planet::new(gen, last_dist, loc));
             last_dist += planets.last().unwrap().radius * 2 + rng.gen_range(0..100);
         }
-        
+
         Self {
             x: rng.gen_range(0..256),
             y: rng.gen_range(0..256),
@@ -92,7 +110,11 @@ impl Star {
             noise_scl: gen.star.noise_scl.gen_rand(),
             noise_effect: gen.star.noise_effect.gen_rand(),
 
-            effective_owner: 0
+            effective_owner: 0,
         }
+    }
+
+    pub fn get_planet_mut(&mut self, pos: usize) -> Option<&mut Planet> {
+        self.planets.get_mut(pos)
     }
 }

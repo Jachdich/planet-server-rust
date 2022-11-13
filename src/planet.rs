@@ -1,7 +1,8 @@
-use crate::planetsurface::PlanetSurface;
-use crate::helpers::Colour;
 use crate::generation::GenParams;
 use crate::generation::Range;
+use crate::helpers::Colour;
+use crate::helpers::SurfaceLocator;
+use crate::planetsurface::PlanetSurface;
 use rand::Rng;
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -19,21 +20,22 @@ pub struct Planet {
     #[serde(rename = "generationZValues")]
     gen_zvalues: Vec<i32>,
     #[serde(rename = "generationNoise")]
-    gen_noise:   Vec<f64>,
+    gen_noise: Vec<f64>,
 
     base_colour: Colour,
     pos_from_star: u32,
     angular_velocity: f64,
     theta: f64,
-    
+
     sector_seed: u32,
-    surface: PlanetSurface,
+    surface: Option<PlanetSurface>,
+    locator: SurfaceLocator,
 }
 
 impl Planet {
-    pub fn new(gen: &GenParams, pos_from_star: u32) -> Self {
+    pub fn new(gen: &GenParams, pos_from_star: u32, locator: SurfaceLocator) -> Self {
         let mut rng = rand::thread_rng();
-        
+
         let num_colours = gen.planet.num_colours.gen_rand();
         let mut gen_chances = Vec::new();
         let mut gen_colours = Vec::new();
@@ -46,7 +48,7 @@ impl Planet {
             gen_zvalues.push(rng.gen_range(0..1000000));
             gen_colours.push(Colour::rand(&Range::new(0..=255)));
         }
-        
+
         Self {
             radius: gen.planet.rad.gen_rand(),
             sea_level: gen.planet.sea_level.gen_rand(),
@@ -59,10 +61,20 @@ impl Planet {
 
             base_colour: Colour::rand(&gen.planet.base_colour),
             pos_from_star,
-            angular_velocity: 1.0 / ((pos_from_star * pos_from_star) as f64) * gen.planet.angular_velocity_mult,
-            theta: rng.gen_range(0.0..(2.0*3.14159265358979323)),
+            angular_velocity: 1.0 / ((pos_from_star * pos_from_star) as f64)
+                * gen.planet.angular_velocity_mult,
+            theta: rng.gen_range(0.0..(2.0 * 3.14159265358979323)),
             sector_seed: 0,
-            surface: PlanetSurface::new(),
+            surface: None,
+            locator,
         }
+    }
+    pub fn get_surface(&mut self) -> &PlanetSurface {
+        if self.surface.is_none() {
+            let surface = PlanetSurface::generate(self.locator);
+            self.surface = Some(surface);
+        }
+
+        self.surface.as_ref().unwrap()
     }
 }
