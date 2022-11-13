@@ -113,7 +113,6 @@ async fn handle_request(request: &Value, map: &ArcMap) -> Value {
             let y = request["y"].as_i64().unwrap() as i32;
             let mut map_lock = map.lock().await;
             let sec = map_lock.get_sector_at(x, y);
-            //TODO any way to do this without dumping and parsing the data?
             json!({
                 "status": Err::Ok as i32,
                 "result": sec
@@ -165,7 +164,7 @@ async fn handle_client(
             responses_vec.push(response);
         }
 
-        responses["responses"] = Value::Array(responses_vec);
+        responses["results"] = Value::Array(responses_vec);
 
         lines.send(responses.to_string()).await?;
     }

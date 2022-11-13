@@ -7,11 +7,15 @@ trait Tile {
     fn get_error(&self) -> String {
         
     }
+    fn on_place(&mut self, ticks: u64/*, parent: &PlanetSurface*/) {
+        
+    }
 }
 
-#
-#[derive(Tile)]
-struct FarmTile;
+struct FarmTile {
+    pub z: u32,
+    pub edge: bool
+}
 
 impl Tile for FarmTile {
     fn tick(&mut self, ticks: u64) {
