@@ -29,7 +29,7 @@ pub struct Planet {
 
     sector_seed: u32,
     surface: Option<PlanetSurface>,
-    locator: SurfaceLocator,
+    pub locator: SurfaceLocator,
 }
 
 impl Planet {
@@ -71,7 +71,7 @@ impl Planet {
     }
     pub fn get_surface(&mut self) -> &PlanetSurface {
         if self.surface.is_none() {
-            let surface = PlanetSurface::generate(self.locator);
+            let surface = PlanetSurface::generate(self);
             self.surface = Some(surface);
         }
 
