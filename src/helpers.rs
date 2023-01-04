@@ -3,7 +3,7 @@ use crate::generation::Range;
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Colour(u32);
 
-#[derive(serde::Serialize, serde::Deserialize, Copy, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Copy, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SurfaceLocator {
     pub planet_pos: usize,

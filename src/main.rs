@@ -70,11 +70,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let listener = TcpListener::bind(&addr).await?;
     log::info!("Listening on {}", &addr);
 
-    let der = include_bytes!("../identity.pfx");
-    let cert = native_tls::Identity::from_pkcs12(der, "").unwrap();
+    // let der = include_bytes!("../identity.pfx");
+    // let cert = native_tls::Identity::from_pkcs12(der, "").unwrap();
+    
+    let mut cert_file = std::fs::File::open("cert.pem").unwrap();
+    let mut certs = vec![];
+    cert_file.read_to_end(&mut certs).unwrap();
+    let mut key_file = std::fs::File::open("key.pem").unwrap();
+    let mut key = vec![];
+    key_file.read_to_end(&mut key).unwrap();
 
+    let pkcs8 = native_tls::Identity::from_pkcs8(&certs, &key).unwrap();
     let tls_acceptor = tokio_native_tls::TlsAcceptor::from(
-        native_tls::TlsAcceptor::builder(cert).build().unwrap(),
+        native_tls::TlsAcceptor::builder(pkcs8).build().unwrap(),
     );
 
     let state = Arc::new(Mutex::new(SectorMap::new(gencfg)));
@@ -140,7 +148,7 @@ async fn handle_request(request: &Value, map: &ArcMap) -> Vec<Value> {
 
             results
         }
-        _ => vec![json!({ "status": Err::InvalidRequest as i32 })],
+        req => vec![json!({ "request": req, "status": Err::InvalidRequest as i32 })],
     }
 }
 

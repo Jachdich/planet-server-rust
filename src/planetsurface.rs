@@ -4,6 +4,7 @@ use crate::tile::{Tile, TileType};
 use common::resources::Resources;
 use crate::planet::Planet;
 use noise::{Seedable, Simplex};
+use rand::Rng;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct PlanetSurface {
@@ -11,7 +12,6 @@ pub struct PlanetSurface {
     pub tasks: Vec<Task>,
 
     resources: Resources,
-    #[serde(skip)]
     rad: u32,
     #[serde(skip)]
     noise_scale: f64,
@@ -26,10 +26,11 @@ pub struct PlanetSurface {
 impl PlanetSurface {
     pub fn generate(parent: &Planet) -> Self {
         let mut tiles = Vec::new();
+        let mut rng = rand::thread_rng();
         let rad = parent.radius;
         for y in 0..rad * 2 {
             for x in 0..rad * 2 {
-                tiles.push(Tile { ty: TileType::Water, z: 0 });
+                tiles.push(Tile { ty: if rng.gen_range(0..0xF) == 0x8 { TileType::Tree } else { TileType::Grass }, z: 0 });
             }
         }
         Self {
