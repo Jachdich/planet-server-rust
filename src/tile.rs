@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize, Serializer};
+use crate::helpers::Colour;
 #[derive(Deserialize, Clone, Copy)]
 pub enum TileType {
     Air,
@@ -41,5 +42,7 @@ impl Serialize for TileType {
 #[derive(Serialize, Deserialize)]
 pub struct Tile {
     pub ty: TileType,
-    pub z: u32,
+    pub z: i32,
+    #[serde(rename = "c")]
+    pub colour: Colour,
 }

@@ -1,6 +1,7 @@
 use crate::generation::Range;
+use std::default::Default;
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Default, Clone, Copy)]
 pub struct Colour(u32);
 
 #[derive(serde::Serialize, serde::Deserialize, Copy, Clone, Default)]
@@ -13,14 +14,14 @@ pub struct SurfaceLocator {
 }
 
 impl SurfaceLocator {
-    // pub fn new() -> Self {
-    //     Self {
-    //         planet_pos: 0,
-    //         star_pos: 0,
-    //         sec_x: 0,
-    //         sec_y: 0,
-    //     }
-    // }
+    pub fn new() -> Self {
+        Self {
+            planet_pos: 0,
+            star_pos: 0,
+            sec_x: 0,
+            sec_y: 0,
+        }
+    }
 }
 
 impl Colour {

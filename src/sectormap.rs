@@ -47,6 +47,6 @@ impl SectorMap {
         let sec = self.get_sector_mut(loc.sec_x, loc.sec_y);
         let star = sec.get_star_mut(loc.star_pos)?;
         let planet = star.get_planet_mut(loc.planet_pos)?;
-        Some(planet.get_surface())
+        Some(&planet.surface)
     }
 }

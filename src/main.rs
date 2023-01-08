@@ -27,6 +27,8 @@ use tokio_util::codec::{Framed, LinesCodec};
 use crate::helpers::SurfaceLocator;
 use crate::sectormap::SectorMap;
 
+use noise::{Seedable, Perlin, Simplex, OpenSimplex, NoiseFn};
+
 enum Err {
     Ok = 0,
     MalformedJson = -1,
