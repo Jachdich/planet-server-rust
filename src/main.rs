@@ -66,7 +66,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     env_logger::init();
     log::set_max_level(log::LevelFilter::Trace);
-    //let addr = "0.0.0.0:28097".to_string();
     let addr = format!("{}:{}", CONF.addr, CONF.port);
 
     let listener = TcpListener::bind(&addr).await?;
@@ -123,7 +122,7 @@ async fn handle_request(request: &Value, map: &ArcMap) -> Vec<Value> {
             let x = request["x"].as_i64().unwrap() as i32;
             let y = request["y"].as_i64().unwrap() as i32;
             let mut map_lock = map.lock().await;
-            let sec = map_lock.get_sector_at(x, y);
+            let sec = map_lock.get_sector(x, y);
             vec![json!({
                 "status": Err::Ok as i32,
                 "result": sec,
@@ -132,20 +131,21 @@ async fn handle_request(request: &Value, map: &ArcMap) -> Vec<Value> {
                 "request": "getSector",
             })]
         }
-        "getSurface" => {
+        "getPlanets" => {
             let loc: SurfaceLocator = serde_json::from_value(request.clone()).unwrap();
             let mut map_lock = map.lock().await;
-            let surface = map_lock.get_surface(&loc).unwrap();
+            let gen = map_lock.gen.clone();
+            let star = map_lock.get_star_mut(&loc).unwrap(); //TODO handle this
             let mut results = Vec::new();
-            for task in &surface.tasks {
-                let mut res_json = serde_json::to_value(&task).unwrap();
-                res_json["request"] = "setTimer".into();
-                results.push(res_json);
-            }
+            // for task in &surface.tasks {
+            //     let mut res_json = serde_json::to_value(&task).unwrap();
+            //     res_json["request"] = "setTimer".into();
+            //     results.push(res_json);
+            // }
             results.push(json!({
-                "request": "getSurface",
+                "request": "getPlanets",
                 "loc": serde_json::to_value(&loc).unwrap(),
-                "result": serde_json::to_value(surface).unwrap(),
+                "result": serde_json::to_value(star.gen_planets(&gen, loc)).unwrap(),
             }));
 
             results

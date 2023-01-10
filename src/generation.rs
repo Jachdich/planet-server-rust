@@ -10,6 +10,7 @@ use serde::de::SeqAccess;
 use serde::de::Error;
 use rand::Rng;
 
+#[derive(Clone)]
 pub struct Range<T>(RangeInclusive<T>);
 
 impl<T> Range<T> {
@@ -82,7 +83,7 @@ impl<'a, T> Deserialize<'a> for Range<T> where T: Deserialize<'a> + Copy {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct StarGen {
     pub num_planets: Range<u32>,
     pub rad: Range<u32>,
@@ -91,7 +92,7 @@ pub struct StarGen {
     pub noise_effect: Range<f64>
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PlanetGen {
     pub rad: Range<u32>,
     pub gen_chance: Range<f64>,
@@ -103,12 +104,12 @@ pub struct PlanetGen {
     pub sea_level: Range<i32>
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct SectorGen {
     pub num_stars: Range<u32>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct GenParams {
     pub planet: PlanetGen,
     pub sector: SectorGen,

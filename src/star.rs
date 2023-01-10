@@ -12,7 +12,7 @@ pub struct Star {
     colour: Colour,
     #[serde(rename = "num")]
     num_planets: usize,
-    planets: Vec<Planet>,
+    planets: Option<Vec<Planet>>,
 
     #[serde(rename = "noiseZ")]
     noise_z: f64,
@@ -86,26 +86,16 @@ fn k_to_rgb(k: u32) -> u32 {
 }
 
 impl Star {
-    pub fn new(gen: &GenParams, loc: SurfaceLocator) -> Self {
+    pub fn new(gen: &GenParams) -> Self {
         let mut rng = rand::thread_rng();
         let radius = gen.star.rad.gen_rand();
-
-        let mut planets: Vec<Planet> = Vec::new();
-        let mut last_dist: u32 = rng.gen_range(0..100) + radius * 6 + 20;
-        for i in 0..gen.star.num_planets.gen_rand() {
-            let mut planet_loc = loc;
-            planet_loc.planet_pos = i as usize;
-            planets.push(Planet::new(gen, last_dist, loc));
-            last_dist += planets.last().unwrap().radius * 2 + rng.gen_range(0..100);
-        }
-
         Self {
             x: rng.gen_range(0..256),
             y: rng.gen_range(0..256),
             radius,
             colour: Colour::new_u32(k_to_rgb(gen.star.temp.gen_rand())),
-            num_planets: planets.len(),
-            planets,
+            num_planets: gen.star.num_planets.gen_rand() as usize,
+            planets: None,
             noise_z: rng.gen_range(0.0..100000.0),
             noise_scl: gen.star.noise_scl.gen_rand(),
             noise_effect: gen.star.noise_effect.gen_rand(),
@@ -114,7 +104,21 @@ impl Star {
         }
     }
 
+    pub fn gen_planets(&mut self, gen: &GenParams, loc: SurfaceLocator) -> &Vec<Planet> {
+        let mut rng = rand::thread_rng();
+        let mut planets: Vec<Planet> = Vec::new();
+        let mut last_dist: u32 = rng.gen_range(0..100) + self.radius * 6 + 20;
+        for i in 0..self.num_planets {
+            let mut planet_loc = loc;
+            planet_loc.planet_pos = i as usize;
+            planets.push(Planet::new(gen, last_dist, loc));
+            last_dist += planets.last().unwrap().radius * 2 + rng.gen_range(0..100);
+        }
+        self.planets = Some(planets);
+        self.planets.as_ref().unwrap()
+    }
+
     pub fn get_planet_mut(&mut self, pos: usize) -> Option<&mut Planet> {
-        self.planets.get_mut(pos)
+        self.planets.as_mut()?.get_mut(pos)
     }
 }

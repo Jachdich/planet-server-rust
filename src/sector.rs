@@ -27,7 +27,7 @@ impl Sector {
         for i in 0..num_stars {
             let mut star_loc = loc;
             star_loc.star_pos = i as usize;
-            stars.push(Star::new(gen, star_loc));
+            stars.push(Star::new(gen));
         }
         Self {
             x,

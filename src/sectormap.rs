@@ -4,10 +4,11 @@ use crate::planetsurface::PlanetSurface;
 use crate::sector::Sector;
 use std::collections::HashMap;
 use std::option::Option;
+use crate::star::Star;
 
 pub struct SectorMap {
     sectors: HashMap<u64, Sector>,
-    gen: GenParams,
+    pub gen: GenParams
 }
 
 fn xy_to_index(x: i32, y: i32) -> u64 {
@@ -23,7 +24,7 @@ impl SectorMap {
         }
     }
 
-    pub fn get_sector_at(&mut self, x: i32, y: i32) -> &Sector {
+    pub fn get_sector(&mut self, x: i32, y: i32) -> &Sector {
         let idx = xy_to_index(x, y);
         if !self.sectors.contains_key(&idx) {
             let mut sector = Sector::new(x, y, &self.gen);
@@ -41,6 +42,11 @@ impl SectorMap {
             self.sectors.insert(idx, sector);
         }
         self.sectors.get_mut(&idx).unwrap()
+    }
+
+    pub fn get_star_mut(&mut self, loc: &SurfaceLocator) -> Option<&mut Star> {
+        let sec = self.get_sector_mut(loc.sec_x, loc.sec_y);
+        sec.get_star_mut(loc.star_pos)
     }
 
     pub fn get_surface(&mut self, loc: &SurfaceLocator) -> Option<&PlanetSurface> {
