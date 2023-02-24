@@ -150,7 +150,10 @@ async fn handle_request(request: &Value, map: &ArcMap) -> Vec<Value> {
 
             results
         }
-        req => vec![json!({ "request": req, "status": Err::InvalidRequest as i32 })],
+        req => {
+            log::warn!("Unknown request '{}'", req);
+            vec![json!({ "request": req, "status": Err::InvalidRequest as i32 })]
+        },
     }
 }
 
